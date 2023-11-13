@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+</head>
+
+<body>
+    <h2>Addition & Subtraction functions:</h2>
+    <form id="calculateForm">
+        <label for="num1">Number 1:</label>
+        <input type="text" id="num1" name="num1" required>
+
+        <label for="num2">Number 2:</label>
+        <input type="text" id="num2" name="num2" required>
+
+        <button type="button" onclick="calculate_simp()">Calculate</button>
+    </form>
+
+    <h2>Results:</h2>
+    <p id="resultAddition"></p>
+    <p id="resultSubtraction"></p>
+    <hr>
+    <h2>Zip function:</h2>
+    <form id="zipForm">
+        <label for="list1">List 1:</label>
+        <input type="text" id="list1" name="list1" required>
+    
+        <label for="list2">List 2:</label>
+        <input type="text" id="list2" name="list2" required>
+    
+        <button type="button" onclick="zip_lists()">Zip Lists</button>
+    </form>
+
+    <h2>Results:</h2>
+    <ul id="resultList"></ul>
+    <hr>
+
+    <h2>Complex Calculation functions:</h2>
+    <form id="calculateFunctionsForm">
+        <label for="num_sum">Number:</label>
+        <input type="text" id="num_sum" name="num_sum" required>
+    
+        <button type="button" onclick="calculate_sum_of_digits()">Calculate Sum of Digits</button>
+        <h2>Result:</h2>
+        <p id="resultSumOfDigits"></p>
+
+        <label for="num_palindrome">Number:</label>
+        <input type="text" id="num_palindrome" name="num_palindrome" required>
+    
+        <button type="button" onclick="calculate_is_palindrome()">Check Palindrome</button>
+        <h2>Result:</h2>
+        <p id="resultIsPalindrome"></p>
+    </form>
+
+    <script>
+        // Variable to track whether "Addition & Subtraction" results have been calculated
+        var additionSubtractionCalculated = false;
+
+        function zip_lists() {
+            // Check if the "Addition & Subtraction" results are displayed
+            if (!additionSubtractionCalculated) {
+                alert("Please use the 'Addition & Subtraction' function first.");
+                return;
+            }
+
+            // Get input values
+            var list1 = document.getElementById("list1").value.split(",");
+            var list2 = document.getElementById("list2").value.split(",");
+
+            // Call the Flask route with the input values
+            fetch("/zip", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ list1: list1, list2: list2 }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Display the result on the page
+                    var resultList = document.getElementById("resultList");
+                    resultList.innerHTML = "";
+                    data.result.forEach(item => {
+                        var li = document.createElement("li");
+                        li.appendChild(document.createTextNode(`${item.element1}, ${item.element2}`));
+                        resultList.appendChild(li);
+                    });
+
+                    // Show the "Zip" form after getting the results
+                    document.getElementById("zipForm").style.display = "block";
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+        function calculate_simp() {
+            // Get input values
+            var num1 = document.getElementById("num1").value;
+            var num2 = document.getElementById("num2").value;
+
+            // Call the Flask route with the input values
+            fetch("/calculate_simp", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ num1: num1, num2: num2 }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Display the results on the page
+                    document.getElementById("resultAddition").innerText = "Addition Result: " + data.result_addition;
+                    document.getElementById("resultSubtraction").innerText = "Subtraction Result: " + data.result_subtraction;
+
+                    // Show the "Complex Calculation" form after getting the results
+                    document.getElementById("calculateFunctionsForm").style.display = "block";
+                    document.getElementById("zipForm").style.display = "block";
+
+                    // Update the variable to indicate that "Addition & Subtraction" results are calculated
+                    additionSubtractionCalculated = true;
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+        function calculate_sum_of_digits() {
+            if (!additionSubtractionCalculated) {
+                alert("Please use the 'Addition & Subtraction' function first.");
+                return;
+            }
+            // Get input value
+            var num = document.getElementById("num_sum").value;
+
+            // Call the Flask route for sum of digits calculation
+            fetch("/calculate_sum_of_digits", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ num: num }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Display the sum of digits result
+                    document.getElementById("resultSumOfDigits").innerText = "Sum of Digits Result: " + data.result_sum_of_digits;
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+        function calculate_is_palindrome() {
+            if (!additionSubtractionCalculated) {
+                alert("Please use the 'Addition & Subtraction' function first.");
+                return;
+            }
+            // Get input value
+            var num = document.getElementById("num_palindrome").value;
+
+            // Call the Flask route for palindrome check
+            fetch("/calculate_is_palindrome", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ num: num }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Display the palindrome check result
+                    document.getElementById("resultIsPalindrome").innerText = "Is Palindrome Result: " + data.result_is_palindrome;
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+
+</html>
